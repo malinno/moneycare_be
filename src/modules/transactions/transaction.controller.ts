@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -18,7 +19,12 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { TransactionsService } from './transaction.service';
-
+import { ApiTags } from '@nestjs/swagger';
+import {
+  CreateTransactionDto,
+  UpdateTransactionDto,
+} from './dto/transaction.dto';
+@ApiTags('Transactions')
 @Controller('transactions')
 @UseGuards(JwtAuthGuard)
 export class TransactionController {
@@ -40,32 +46,22 @@ export class TransactionController {
     return { error: 'Invalid period' };
   }
   @Post()
-  async create(
-    @Req() req: any,
-    @Body()
-    body: { type: string; amount: number; categoryId?: string; note?: string },
-  ) {
+  async create(@Req() req: any, @Body() dto: CreateTransactionDto) {
     return this.txService.create(
       req.user.userId,
-      body.type,
-      body.amount,
-      body.categoryId,
-      body.note,
+      dto.type,
+      dto.amount,
+      dto.categoryId,
+      dto.note,
     );
   }
   @Put(':id')
   async update(
     @Req() req: any,
     @Param('id') id: string,
-    @Body()
-    body: {
-      type?: string;
-      amount?: number;
-      categoryId?: string;
-      note?: string;
-    },
+    @Body() dto: UpdateTransactionDto,
   ) {
-    return this.txService.updateTransaction(req.user.userId, id, body);
+    return this.txService.updateTransaction(req.user.userId, id, dto);
   }
 
   @Delete(':id')

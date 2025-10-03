@@ -1,11 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Body, Controller, Post, UnauthorizedException } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
+import { RegisterDto, LoginDto, RefreshDto, LogoutDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 
+@ApiTags('Auth') // 👈 nhóm API trong Swagger
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -33,21 +35,19 @@ export class AuthController {
   }
 
   @Post('refresh')
-  async refresh(@Body() body: { refreshToken: string }) {
+  async refresh(@Body() dto: RefreshDto) {
     try {
-      const decoded = this.jwtService.verify(body.refreshToken, {
+      const decoded = this.jwtService.verify(dto.refreshToken, {
         secret: process.env.JWT_REFRESH_SECRET || 'refreshSecret',
       });
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      return this.authService.refresh(decoded.sub, body.refreshToken);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      return this.authService.refresh(decoded.sub, dto.refreshToken);
     } catch (err) {
       throw new UnauthorizedException('Invalid refresh token');
     }
   }
 
   @Post('logout')
-  async logout(@Body() body: { userId: string }) {
-    return this.authService.logout(body.userId);
+  async logout(@Body() dto: LogoutDto) {
+    return this.authService.logout(dto.userId);
   }
 }

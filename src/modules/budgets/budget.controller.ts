@@ -13,9 +13,12 @@ import {
   Delete,
   Put,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { BudgetsService } from './budget.service';
+import { CreateBudgetDto, UpdateBudgetDto } from './dto/budget.dto';
 
+@ApiTags('Budgets')
 @Controller('budgets')
 @UseGuards(JwtAuthGuard)
 export class BudgetController {
@@ -27,24 +30,22 @@ export class BudgetController {
   }
 
   @Post()
-  async createBudget(
-    @Req() req: any,
-    @Body() body: { categoryId: string; limitAmount: number; period?: string },
-  ) {
+  async createBudget(@Req() req: any, @Body() dto: CreateBudgetDto) {
     return this.budgetsService.create(
       req.user.userId,
-      body.categoryId,
-      body.limitAmount,
-      body.period,
+      dto.categoryId,
+      dto.limitAmount,
+      dto.period,
     );
   }
+
   @Put(':id')
   async update(
     @Req() req: any,
     @Param('id') id: string,
-    @Body() body: { limitAmount?: number; period?: string },
+    @Body() dto: UpdateBudgetDto,
   ) {
-    return this.budgetsService.updateBudget(req.user.userId, id, body);
+    return this.budgetsService.updateBudget(req.user.userId, id, dto);
   }
 
   @Delete(':id')

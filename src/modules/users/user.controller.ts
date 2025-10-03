@@ -2,10 +2,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/require-await */
-import { Controller, Get, Put, Body, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Put, Req, UseGuards } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UsersService } from './user.service';
+import { UpdateUserDto } from './dto/user.dto';
 
+@ApiTags('Users')
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 export class UserController {
@@ -14,17 +17,14 @@ export class UserController {
   @Get('me')
   async getMe(@Req() req: any) {
     const user = await this.usersService.findById(req.user.userId);
-    if (!user) {
-      return { message: 'User not found' }; // hoặc throw new NotFoundException()
-    }
+    if (!user) return { message: 'User not found' };
     return { id: user._id, username: user.username };
   }
 
   @Put('me')
-  async updateMe(
-    @Req() req: any,
-    @Body() body: { username?: string; password?: string },
-  ) {
-    return this.usersService.updateUser(req.user.userId, body);
+  async updateMe(@Req() req: any, @Body() dto: UpdateUserDto) {
+    const updated = await this.usersService.updateUser(req.user.userId, dto);
+    if (!updated) return { message: 'User not found' };
+    return { id: updated._id, username: updated.username };
   }
 }

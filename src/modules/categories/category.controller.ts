@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/require-await */
 import {
   Body,
   Controller,
@@ -9,9 +8,12 @@ import {
   Delete,
   Put,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CategoriesService } from './category.service';
+import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 
+@ApiTags('Categories')
 @Controller('categories')
 @UseGuards(JwtAuthGuard)
 export class CategoryController {
@@ -23,17 +25,13 @@ export class CategoryController {
   }
 
   @Post()
-  async create(
-    @Body() body: { name: string; type: 'expense' | 'income'; icon?: string },
-  ) {
-    return this.categoriesService.create(body.name, body.type, body.icon);
+  async create(@Body() dto: CreateCategoryDto) {
+    return this.categoriesService.create(dto.name, dto.type, dto.icon);
   }
+
   @Put(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() body: { name?: string; icon?: string },
-  ) {
-    return this.categoriesService.updateCategory(id, body);
+  async update(@Param('id') id: string, @Body() dto: UpdateCategoryDto) {
+    return this.categoriesService.updateCategory(id, dto);
   }
 
   @Delete(':id')
